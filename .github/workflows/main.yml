@@ -1,0 +1,38 @@
+name: Android CI (Auto Build APK)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Unzip Project Files
+      run: |
+        unzip project.zip.zip -d . || true
+        unzip project.zip -d . || true
+
+    - name: Grant Execute Permission for Gradlew
+      run: chmod +x gradlew
+
+    - name: Build APK with Gradle
+      run: ./gradlew assembleDebug
+
+    - name: Upload Output APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ModMenu-Debug-APK
+        path: "**/build/outputs/apk/debug/*.apk"
