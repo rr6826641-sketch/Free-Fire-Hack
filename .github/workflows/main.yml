@@ -24,6 +24,12 @@ jobs:
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: 21.0.6113669
+        local-cache: true
+
+    - name: Install CMake 3.10.2 (Auto-Accept Licenses)
+      run: |
+        yes | sdkmanager --licenses
+        sdkmanager --install "cmake;3.10.2.4988404"
 
     - name: Unzip Project Files
       run: |
