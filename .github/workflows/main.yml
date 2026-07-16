@@ -1,15 +1,12 @@
 name: Android CI (Auto Build APK)
-
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v4
@@ -23,7 +20,7 @@ jobs:
     - name: Set up Android NDK
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: 21.0.6113669
+        ndk-version: r21e
         local-cache: true
 
     - name: Install CMake 3.10.2 (Auto-Accept Licenses)
@@ -33,8 +30,8 @@ jobs:
 
     - name: Unzip Project Files
       run: |
-        unzip project.zip.zip -d . || true
-        unzip project.zip -d . || true
+        if [ -f project.zip.zip ]; then unzip -o project.zip.zip -d .; fi
+        if [ -f project.zip ]; then unzip -o project.zip -d .; fi
 
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
