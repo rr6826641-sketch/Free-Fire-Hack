@@ -20,6 +20,11 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
 
+    - name: Set up Android NDK
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r21e
+
     - name: Unzip Project Files
       run: |
         unzip project.zip.zip -d . || true
