@@ -31,13 +31,13 @@ jobs:
 
     - name: Install CMake 3.10.2 (Auto-Accept Licenses)
       run: |
-        yes | sdkmanager --licenses
-        sdkmanager --install "cmake;3.10.2.4988404"
+        $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses <<< y
+        $ANDROID_SDK_ROOT/tools/bin/sdkmanager "cmake;3.10.2.4988404"
 
     - name: Unzip Project Files
       run: |
-        unzip project.zip.zip -d . || true
-        unzip project.zip -d . || true
+        if [ -f "project.zip.zip" ]; then unzip -o project.zip.zip -d .; fi
+        if [ -f "project.zip" ]; then unzip -o project.zip -d .; fi
 
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
