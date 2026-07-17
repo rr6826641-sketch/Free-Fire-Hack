@@ -1,12 +1,15 @@
 name: Android CI (Auto Build APK)
+
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v4
@@ -20,16 +23,10 @@ jobs:
     - name: Set up Android SDK Tools
       uses: android-actions/setup-android@v3
 
-    - name: Set up Android NDK
-      uses: nttld/setup-ndk@v1
-      with:
-        ndk-version: r21e
-        local-cache: true
-
-    - name: Install CMake 3.10.2 (Auto-Accept Licenses)
+    - name: Install NDK and CMake (Auto-Accept Licenses)
       run: |
         yes | sdkmanager --licenses || true
-        sdkmanager --install "cmake;3.10.2.4988404"
+        sdkmanager --install "ndk;21.0.6113669" "cmake;3.10.2.4988404"
 
     - name: Switch to JDK 8 (For Gradle Build)
       uses: actions/setup-java@v4
@@ -47,19 +44,24 @@ jobs:
 
     - name: Force Correct NDK Version in build.gradle
       run: |
-        # Get the ACTUAL installed NDK version number (not the alias like r21e)
-        REAL_NDK_VERSION=$(basename "$ANDROID_NDK_HOME")
-        echo "Actual installed NDK version is: $REAL_NDK_VERSION"
+        # ANDROID_NDK_HOME set kar rahe hain jo sdkmanager ne install kiya hai
+        export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/21.0.6113669
+        REAL_NDK_VERSION="21.0.6113669"
+        echo "Using NDK version: $REAL_NDK_VERSION"
 
         APP_GRADLE=$(find . -name "build.gradle" -path "*/app/*" | head -n 1)
         echo "Editing: $APP_GRADLE"
-        if grep -q "ndkVersion" "$APP_GRADLE"; then
-          sed -i "s/ndkVersion .*/ndkVersion \"$REAL_NDK_VERSION\"/" "$APP_GRADLE"
+        if [ ! -z "$APP_GRADLE" ]; then
+          if grep -q "ndkVersion" "$APP_GRADLE"; then
+            sed -i "s/ndkVersion .*/ndkVersion \"$REAL_NDK_VERSION\"/" "$APP_GRADLE"
+          else
+            sed -i "/android {/a\\    ndkVersion \"$REAL_NDK_VERSION\"" "$APP_GRADLE"
+          fi
+          echo "----- Verifying -----"
+          grep -A2 -B2 "ndkVersion" "$APP_GRADLE"
         else
-          sed -i "/android {/a\\    ndkVersion \"$REAL_NDK_VERSION\"" "$APP_GRADLE"
+          echo "Warning: build.gradle not found!"
         fi
-        echo "----- Verifying -----"
-        grep -A2 -B2 "ndkVersion" "$APP_GRADLE"
 
     - name: Build APK with Gradle
       run: ./gradlew assembleDebug
