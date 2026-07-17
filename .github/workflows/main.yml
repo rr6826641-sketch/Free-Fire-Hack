@@ -45,6 +45,18 @@ jobs:
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
 
+    - name: Force Correct NDK Version in build.gradle
+      run: |
+        APP_GRADLE=$(find . -name "build.gradle" -path "*/app/*" | head -n 1)
+        echo "Editing: $APP_GRADLE"
+        if grep -q "ndkVersion" "$APP_GRADLE"; then
+          sed -i 's/ndkVersion .*/ndkVersion "21.0.6113669"/' "$APP_GRADLE"
+        else
+          sed -i '/android {/a\    ndkVersion "21.0.6113669"' "$APP_GRADLE"
+        fi
+        echo "----- Verifying -----"
+        grep -A2 -B2 "ndkVersion" "$APP_GRADLE"
+
     - name: Build APK with Gradle
       run: ./gradlew assembleDebug
 
