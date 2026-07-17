@@ -14,10 +14,11 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 8
+    # 1. Pehle Java 17 set kar rahe hain taake Android SDK/CMake bina kisi error ke install ho sakein
+    - name: Set up JDK 17 (For SDK Tools)
       uses: actions/setup-java@v4
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'temurin'
 
     - name: Set up Android SDK Tools
@@ -29,10 +30,17 @@ jobs:
         ndk-version: 21.0.6113669
         local-cache: true
 
-    - name: Install CMake 3.10.2 (Fix Automatic Licenses)
+    - name: Install CMake 3.10.2 (Auto-Accept Licenses)
       run: |
         yes | sdkmanager --licenses
         sdkmanager --install "cmake;3.10.2.4988404"
+
+    # 2. Ab Java 8 par switch kar rahe hain kyunki aapke project ki build Java 8 mangti hai
+    - name: Switch to JDK 8 (For Gradle Build)
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
 
     - name: Unzip Project Files
       run: |
