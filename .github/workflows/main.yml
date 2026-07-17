@@ -47,12 +47,16 @@ jobs:
 
     - name: Force Correct NDK Version in build.gradle
       run: |
+        # Get the ACTUAL installed NDK version number (not the alias like r21e)
+        REAL_NDK_VERSION=$(basename "$ANDROID_NDK_HOME")
+        echo "Actual installed NDK version is: $REAL_NDK_VERSION"
+
         APP_GRADLE=$(find . -name "build.gradle" -path "*/app/*" | head -n 1)
         echo "Editing: $APP_GRADLE"
         if grep -q "ndkVersion" "$APP_GRADLE"; then
-          sed -i 's/ndkVersion .*/ndkVersion "21.0.6113669"/' "$APP_GRADLE"
+          sed -i "s/ndkVersion .*/ndkVersion \"$REAL_NDK_VERSION\"/" "$APP_GRADLE"
         else
-          sed -i '/android {/a\    ndkVersion "21.0.6113669"' "$APP_GRADLE"
+          sed -i "/android {/a\\    ndkVersion \"$REAL_NDK_VERSION\"" "$APP_GRADLE"
         fi
         echo "----- Verifying -----"
         grep -A2 -B2 "ndkVersion" "$APP_GRADLE"
