@@ -1,20 +1,16 @@
 name: Android CI (Auto Build APK)
-
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    # 1. Pehle Java 17 set kar rahe hain taake Android SDK/CMake bina kisi error ke install ho sakein
     - name: Set up JDK 17 (For SDK Tools)
       uses: actions/setup-java@v4
       with:
@@ -27,15 +23,14 @@ jobs:
     - name: Set up Android NDK
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: 21.0.6113669
+        ndk-version: r21e
         local-cache: true
 
     - name: Install CMake 3.10.2 (Auto-Accept Licenses)
       run: |
-        yes | sdkmanager --licenses
+        yes | sdkmanager --licenses || true
         sdkmanager --install "cmake;3.10.2.4988404"
 
-    # 2. Ab Java 8 par switch kar rahe hain kyunki aapke project ki build Java 8 mangti hai
     - name: Switch to JDK 8 (For Gradle Build)
       uses: actions/setup-java@v4
       with:
@@ -44,8 +39,8 @@ jobs:
 
     - name: Unzip Project Files
       run: |
-        if [ -f "project.zip.zip" ]; then unzip -o project.zip.zip -d .; fi
-        if [ -f "project.zip" ]; then unzip -o project.zip -d .; fi
+        if [ -f project.zip.zip ]; then unzip -o project.zip.zip -d .; fi
+        if [ -f project.zip ]; then unzip -o project.zip -d .; fi
 
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
